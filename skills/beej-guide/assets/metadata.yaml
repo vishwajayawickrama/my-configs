@@ -1,0 +1,15 @@
+---
+title: "BOOK_TITLE"
+subtitle: "BOOK_SUBTITLE"
+author: "AUTHOR_NAME"
+date: "VERSION_AND_DATE"
+lang: en
+documentclass: report
+fontsize: 11pt
+geometry: margin=2.5cm
+colorlinks: true
+linkcolor: RoyalBlue
+urlcolor: RoyalBlue
+toccolor: black
+toc-depth: 1
+---
