@@ -4,12 +4,16 @@ Personal configuration and tooling, version-controlled.
 
 ## skills/
 
-Claude Code skills. To install one, copy (or symlink) its directory
-into `~/.claude/skills/`:
+Claude Code skills. **This repo is the source of truth** — install a
+skill by symlinking it into `~/.claude/skills/`, so edits here are
+live immediately:
 
 ```
-cp -R skills/beej-guide ~/.claude/skills/
+ln -s "$(pwd)/skills/beej-guide" ~/.claude/skills/beej-guide
 ```
+
+(On a machine where this repo isn't cloned, `cp -R` works too — but
+then remember the copy won't track updates.)
 
 | Skill | What it does |
 |-------|--------------|
