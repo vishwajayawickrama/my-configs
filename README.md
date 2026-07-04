@@ -18,3 +18,15 @@ then remember the copy won't track updates.)
 | Skill | What it does |
 |-------|--------------|
 | `beej-guide` | Writes a full-length technical guide/book on any topic in the style of Beej's Guides (beej.us): friendly voice, chapter projects, exercises, verified examples, PDF + split HTML output. Includes the style dossier and build templates. |
+
+## ghostty/
+
+[Ghostty](https://ghostty.org) terminal configuration. **This repo is
+the source of truth** — symlink the config into place so edits here are
+live immediately:
+
+```
+ln -s "$(pwd)/ghostty/config" ~/Library/Application\ Support/com.mitchellh.ghostty/config
+```
+
+(Ghostty also reads `~/.config/ghostty/config` if you prefer that path.)
