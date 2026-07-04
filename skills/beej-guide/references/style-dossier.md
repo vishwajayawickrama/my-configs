@@ -4,6 +4,12 @@ Research notes from Beej's Guide to C Programming, Beej's Guide to
 Python Programming, and Beej's Guide to Network Programming
 (beej.us), gathered July 2026. This is the register to hit.
 
+> **Punctuation caveat:** the quotes and prose below use em dashes
+> (`—`) freely, because Beej does. Our house style bans them in book
+> content (SKILL.md, Phase 4). Match the *voice* here, not the
+> punctuation: recast asides with commas, colons, parentheses, or a
+> sentence break instead.
+
 ## Voice fundamentals
 
 - **Conversational first person, addressed to "you"** — a smart friend

@@ -132,6 +132,13 @@ Density floor per chapter — do not write thin chapters:
   quotes: `references/style-dossier.md`. Read it before writing
   chapter 1, and re-skim if chapters start sounding like
   documentation.
+- **No em dashes (`—`) anywhere in book content.** The Beej register
+  leans on them heavily and the dossier quotes are full of them, so
+  this takes active restraint. Recast every one: a comma for a light
+  aside, a colon before an explanation or list, parentheses for a
+  true aside, or just split into two sentences. En dashes in numeric
+  ranges (`3–15`) are fine; hyphens in compounds are fine. This is a
+  house-style rule, enforced in Phase 7.
 
 ## Phase 5 — Cross-references
 
@@ -162,6 +169,9 @@ Density floor per chapter — do not write thin chapters:
 - Shell transcripts in plain ``` blocks (styled dark by the CSS);
   code in ```<lang> blocks for highlighting.
 - Tables: pipe tables; escape `|` inside table cells as `\|`.
+- No em dashes in prose (see Phase 4). Do not "fix" this by pasting a
+  literal `--` in prose either: pandoc renders `--` as an en dash and
+  `---` as an em dash, so avoid both as sentence punctuation.
 
 ## Phase 7 — Final QA (all of these, every time)
 
@@ -169,12 +179,16 @@ Density floor per chapter — do not write thin chapters:
 2. Generate the intermediate .tex (`pandoc -s -o book.tex`), compile,
    then: `grep -E "^!"` (must be 0) and `grep Overfull` (fix anything
    > ~10pt by rewording).
-3. Render 2–3 PDF pages to images and LOOK at them (title page, a
+3. **Punctuation sweep:** `grep -n "—" chapters/*.md` must return
+   nothing (em dashes are banned per Phase 4). Also `grep -n -- "---"
+   chapters/*.md` outside code fences, since pandoc turns `---` into
+   an em dash. Recast any hits.
+4. Render 2–3 PDF pages to images and LOOK at them (title page, a
    code-heavy page): wrap `\includegraphics[page=N]` in a scratch
    .tex, then `sips` to PNG.
-4. HTML: index has all chapter links; first page has empty prev, last
+5. HTML: index has all chapter links; first page has empty prev, last
    has no next; spot-check a middle chapter's nav and highlighting
    spans.
-5. Cross-reference grep (Phase 5) clean.
-6. Page count and chapter count reported to the user, with the
+6. Cross-reference grep (Phase 5) clean.
+7. Page count and chapter count reported to the user, with the
    verification story (how many examples run, against which version).
