@@ -8,7 +8,7 @@ tool at once with no re-copying.
 ## 1. Get the repo
 
 ```sh
-git clone <REMOTE_URL> ~/Codes/my-configs
+git clone https://github.com/vishwajayawickrama/my-configs.git ~/Codes/my-configs
 # or, if already cloned:
 cd ~/Codes/my-configs && git pull
 ```
