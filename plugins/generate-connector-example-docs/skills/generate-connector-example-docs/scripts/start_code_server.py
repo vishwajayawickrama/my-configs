@@ -29,9 +29,15 @@ def build_command(context: dict, port: int, user_data_dir: Path) -> list[str]:
         "--disable-telemetry",
         "--disable-update-check",
         "--ignore-last-opened",
-        "--new-window",
         str(Path(context["sample_parent_dir"]).resolve()),
     ]
+
+
+def isolated_environment() -> dict[str, str]:
+    """Prevent code-server from becoming a client of the parent VS Code session."""
+    environment = os.environ.copy()
+    environment.pop("VSCODE_IPC_HOOK_CLI", None)
+    return environment
 
 
 def wait_until_ready(endpoint: str, timeout: float = 30.0) -> None:
@@ -65,6 +71,7 @@ def start(context_path: Path, port: int | None = None, timeout: float = 30.0) ->
             stdout=log_file,
             stderr=subprocess.STDOUT,
             start_new_session=True,
+            env=isolated_environment(),
         )
 
     endpoint = f"http://127.0.0.1:{selected_port}"

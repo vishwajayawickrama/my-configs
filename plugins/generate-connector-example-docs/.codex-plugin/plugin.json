@@ -1,6 +1,6 @@
 {
   "name": "generate-connector-example-docs",
-  "version": "0.1.0+codex.20260714193407",
+  "version": "0.1.0+codex.20260714194838",
   "description": "Generate validated WSO2 Integrator connector example guides, screenshots, sample projects, and deterministic sample links from Ballerina Central packages.",
   "author": {
     "name": "vishwajayawickrama",

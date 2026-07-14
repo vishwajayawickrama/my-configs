@@ -16,7 +16,7 @@ from crop_screenshots import crop_directory
 from inject_try_it_yourself import build_section, build_urls, inject_try_it_yourself
 from prepare_run import build_context, central_url, parse_coordinate, safe_slug
 from run_lifecycle import matches_workspace_url, workspace_url
-from start_code_server import build_command
+from start_code_server import build_command, isolated_environment
 from validate_output import validate
 from validate_browser_preflight import validate_preflight
 
@@ -163,7 +163,20 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn("127.0.0.1:45678", command)
             self.assertIn("--user-data-dir", command)
             self.assertIn("--ignore-last-opened", command)
+            self.assertNotIn("--new-window", command)
             self.assertIn(context["sample_parent_dir"], command)
+
+    def test_code_server_child_does_not_inherit_editor_ipc(self):
+        import os
+        old_value = os.environ.get("VSCODE_IPC_HOOK_CLI")
+        try:
+            os.environ["VSCODE_IPC_HOOK_CLI"] = "/tmp/editor-ipc.sock"
+            self.assertNotIn("VSCODE_IPC_HOOK_CLI", isolated_environment())
+        finally:
+            if old_value is None:
+                os.environ.pop("VSCODE_IPC_HOOK_CLI", None)
+            else:
+                os.environ["VSCODE_IPC_HOOK_CLI"] = old_value
 
     def test_preflight_validation_and_cleanup_record(self):
         try:
