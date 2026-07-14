@@ -1,0 +1,20 @@
+{
+  "name": "my-configs",
+  "interface": {
+    "displayName": "My Configs"
+  },
+  "plugins": [
+    {
+      "name": "generate-connector-example-docs",
+      "source": {
+        "source": "local",
+        "path": "./plugins/generate-connector-example-docs"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

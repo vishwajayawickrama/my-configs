@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Connector Example Docs"
+  short_description: "Generate WSO2 connector guides and screenshots"
+  default_prompt: "Use $generate-connector-example-docs to generate a WSO2 Integrator connector example guide for ballerinax/mysql."

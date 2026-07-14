@@ -31,6 +31,7 @@ destination paths, plus any reload/restart step:
 | Config | What it is |
 |--------|------------|
 | [`skills/`](skills/README.md) | Reusable agent skills (Claude Code, Codex, or anything that reads a skills directory). |
+| [`plugins/`](plugins/README.md) | Installable Codex plugins with bundled skills and MCP servers. |
 | [`ghostty/`](ghostty/README.md) | [Ghostty](https://ghostty.org) terminal configuration. |
 
 ## Updating
