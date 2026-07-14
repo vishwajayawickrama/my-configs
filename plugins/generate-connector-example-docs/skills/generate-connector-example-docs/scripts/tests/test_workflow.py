@@ -9,9 +9,9 @@ from pathlib import Path
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
+from append_central_examples import append_central_examples, examples_from_metadata, extract_examples
 from collect_screenshot import collect
 from crop_screenshots import crop_directory
-from finalize_run import append_examples, extract_examples
 from inject_try_it_yourself import build_section, build_urls, inject_try_it_yourself
 from prepare_run import build_context, central_url, parse_coordinate, safe_slug
 from validate_output import validate
@@ -170,6 +170,30 @@ class WorkflowTests(unittest.TestCase):
         readme = "# Package\n\n## Examples\n\nUse this example.\n\n## API Docs\nNope"
         self.assertEqual(extract_examples(readme), "Use this example.")
 
+    def test_examples_extraction_heading_variants_and_nested_content(self):
+        for level in range(1, 7):
+            with self.subTest(level=level):
+                marker = "#" * level
+                next_marker = "#" * level
+                nested = f"{'#' * (level + 1)} Nested\r\nKeep.\r\n" if level < 6 else ""
+                readme = (
+                    f"# Package\r\n\r\n{marker} eXaMpLe\r\n\r\n"
+                    f"Intro.\r\n\r\n{nested}"
+                    f"{next_marker} API Docs\r\nDrop."
+                )
+                expected = f"Intro.\n\n{'#' * (level + 1)} Nested\nKeep." if level < 6 else "Intro."
+                self.assertEqual(extract_examples(readme), expected)
+
+    def test_examples_metadata_edge_cases(self):
+        with tempfile.TemporaryDirectory() as temp:
+            metadata = Path(temp) / "metadata.json"
+            for payload in ({}, {"readme": ""}, {"readme": "# Package"}, {"readme": "## Examples\n\n"}):
+                metadata.write_text(json.dumps(payload), encoding="utf-8")
+                self.assertIsNone(examples_from_metadata(metadata))
+            metadata.write_text(json.dumps({"readme": ["invalid"]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "must be a string"):
+                examples_from_metadata(metadata)
+
     def test_collect_and_validate_complete_run(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -220,7 +244,11 @@ class WorkflowTests(unittest.TestCase):
     def test_finalizer_records_deterministic_sample_links(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            context = build_context("ballerinax/mysql", root, {"version": "1.2.3", "readme": ""})
+            context = build_context(
+                "ballerinax/mysql",
+                root,
+                {"version": "1.2.3", "readme": "# Package\n\n## Examples\n\nUse Central.\n"},
+            )
             prefix = context["image_prefix"]
             source = root / "source.png"
             source.write_bytes(PNG)
@@ -240,9 +268,16 @@ class WorkflowTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             run = json.loads((Path(context["run_log_dir"]) / "run.json").read_text(encoding="utf-8"))
             self.assertTrue(run["try_it_yourself_added"])
+            self.assertTrue(run["central_examples_found"])
+            self.assertTrue(run["examples_added"])
             self.assertEqual(run["sample_name"], "mysql_connector_sample")
             self.assertTrue(run["devant_url"].endswith("/mysql_connector_sample"))
             self.assertTrue(run["github_url"].endswith("/mysql_connector_sample"))
+            self.assertTrue(
+                Path(context["doc_path"]).read_text(encoding="utf-8").endswith(
+                    "## More code examples\n\nUse Central.\n"
+                )
+            )
 
     def test_validator_rejects_template_and_style_leaks(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -295,9 +330,40 @@ class WorkflowTests(unittest.TestCase):
                 json.dumps({"readme": "# Package\n\n## Examples\n\nUse this example.\n"}),
                 encoding="utf-8",
             )
-            self.assertTrue(append_examples(doc, metadata))
-            self.assertFalse(append_examples(doc, metadata))
+            self.assertEqual(append_central_examples(doc, metadata), (True, True))
+            self.assertEqual(append_central_examples(doc, metadata), (True, False))
             self.assertEqual(doc.read_text(encoding="utf-8").count("## More code examples"), 1)
+
+    def test_central_examples_cli_writes_sandbox_markdown(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context(
+                "ballerinax/mysql",
+                Path(temp),
+                {"version": "1.2.3", "readme": "# Package\n\n## Examples\n\nUse Central.\n"},
+            )
+            doc = Path(context["doc_path"])
+            doc.write_text("# Example\n\n## Try it yourself\n\nExact placeholder.\n", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(SCRIPTS / "append_central_examples.py"), "--context", context["context_path"]],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), {"examples_found": True, "examples_added": True})
+            self.assertTrue(doc.read_text(encoding="utf-8").endswith("## More code examples\n\nUse Central.\n"))
+
+    def test_central_examples_conflicts_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            doc = root / "guide.md"
+            metadata = root / "metadata.json"
+            metadata.write_text(json.dumps({"readme": "## Examples\n\nExpected."}), encoding="utf-8")
+            doc.write_text("# Example\n\n## More code examples\n\nDifferent.\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                append_central_examples(doc, metadata)
+            metadata.write_text(json.dumps({"readme": "# Package"}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "has no examples"):
+                append_central_examples(doc, metadata)
 
     def test_rejects_old_or_mismatched_try_it_yourself_links(self):
         with tempfile.TemporaryDirectory() as temp:

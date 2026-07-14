@@ -26,7 +26,7 @@ Reject a bare package name. Treat an omitted version as `latest`. Accept optiona
 6. After every `browser_take_screenshot` call, immediately run `scripts/collect_screenshot.py RETURNED_PATH SCREENSHOTS_DIR/FILENAME`. Keep filenames sequential from `01` through `06`.
 7. Create the integration using the context's exact `sample_name` at `sample_dir`. Make `sample_dir` the project root: `Ballerina.toml` and the generated `.bal` files must live directly within it. Do not rename the directory or add a suffix. If the UI creates the project elsewhere or one level deeper, copy its contents into `sample_dir` before finalization.
 8. Read `references/documentation-contract.md` and `references/microsoft-writing-style.md` completely before writing. Copy `assets/templates/connector-example-doc.md` to `doc_path`, then replace every placeholder with facts from the completed workflow. Remove template comments and inapplicable conditional sections. Do not author from a blank file, create an intermediate execution prompt, or use a second model for enforcement.
-9. Run `scripts/finalize_run.py --context CONTEXT_PATH`. It deterministically injects **Try it yourself**, appends verified Central examples, and validates the output. If it reports failures, correct the guide or artifacts and rerun until it succeeds.
+9. Run `scripts/finalize_run.py --context CONTEXT_PATH`. It deterministically injects **Try it yourself**, calls `scripts/append_central_examples.py` to append examples from the cached Central API response, and validates the output. If it reports failures, correct the guide or artifacts and rerun until it succeeds.
 10. Stop the code-server process only when this run started it. Report the guide, screenshot directory, sample directory, resolved package version, and validation status.
 
 ## Safety and boundaries
@@ -35,5 +35,6 @@ Reject a bare package name. Treat an omitted version as `latest`. Accept optiona
 - Never overwrite a prior run automatically.
 - Never put credentials or secret values in the guide, screenshots, sample, logs, or config files. Leave configurable values empty or use obvious non-secret placeholders.
 - Generate **Try it yourself** links only through the finalization script. The links target the canonical future sample location; they do not publish the sample.
+- Generate **More code examples** only through `scripts/append_central_examples.py`. Never author, summarize, or alter Central example content manually.
 - Do not create branches, commits, pushes, deployments, issues, or pull requests.
 - Do not support trigger packages or batch queues in this skill.

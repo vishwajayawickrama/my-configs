@@ -30,7 +30,7 @@ Use exactly these H2 sections in this order, replacing bracketed names:
 6. `## Configuring the [Connector name] connection`
 7. `## Configuring the [Connector name] [Operation name] operation`
 8. `## Try it yourself`, added only by deterministic finalization
-9. `## More code examples` only when appended from the Central README
+9. `## More code examples` only when `append_central_examples.py` extracts it from the cached Central API response
 
 Do not add a summary, conclusion, next steps, metadata, frontmatter, or timestamp footer. Do not author **Try it yourself** manually; finalization inserts its exact Markdown.
 
@@ -138,7 +138,7 @@ Remove all references to:
 - WSO2 Integrator BI; use **WSO2 Integrator**
 - Ballerina as the end-user platform name
 
-Allow fenced code only for the single Mermaid block in the authored guide. The optional **More code examples** appendix is copied verbatim from Ballerina Central after authoring and may contain its own source examples.
+Allow fenced code only for the single Mermaid block in the authored guide. The optional **More code examples** appendix is copied verbatim by `append_central_examples.py` from the resolved package's cached Ballerina Central metadata and may contain its own source examples.
 
 ## Final review
 

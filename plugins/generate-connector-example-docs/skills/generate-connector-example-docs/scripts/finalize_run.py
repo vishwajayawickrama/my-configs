@@ -5,50 +5,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
+from append_central_examples import append_central_examples
 from crop_screenshots import crop_directory
 from inject_try_it_yourself import build_urls, inject_try_it_yourself
 from validate_output import validate
-
-
-def extract_examples(readme: str) -> Optional[str]:
-    lines = readme.splitlines()
-    start = None
-    level = 0
-    for index, line in enumerate(lines):
-        match = re.match(r"^(#{1,6})\s+examples?\s*$", line.strip(), re.I)
-        if match:
-            start = index + 1
-            level = len(match.group(1))
-            break
-    if start is None:
-        return None
-    body: list[str] = []
-    for line in lines[start:]:
-        heading = re.match(r"^(#{1,6})\s+", line)
-        if heading and len(heading.group(1)) <= level:
-            break
-        body.append(line)
-    value = "\n".join(body).strip()
-    return value or None
-
-
-def append_examples(doc_path: Path, metadata_path: Path) -> bool:
-    text = doc_path.read_text(encoding="utf-8")
-    if re.search(r"^## More code examples\s*$", text, re.M):
-        return False
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    readme = metadata.get("readme")
-    examples = extract_examples(readme) if isinstance(readme, str) else None
-    if not examples:
-        return False
-    doc_path.write_text(text.rstrip() + "\n\n## More code examples\n\n" + examples + "\n", encoding="utf-8")
-    return True
 
 
 def main() -> int:
@@ -65,7 +29,9 @@ def main() -> int:
             doc_path, Path(context["sample_dir"]), context["sample_name"]
         )
         devant_url, github_url = build_urls(context["sample_name"])
-        examples_added = append_examples(doc_path, Path(context["metadata_path"]))
+        central_examples_found, examples_added = append_central_examples(
+            doc_path, Path(context["metadata_path"])
+        )
         already_cropped = bool(previous.get("screenshots_cropped"))
         if not args.skip_crop and not already_cropped:
             crop_directory(Path(context["screenshots_dir"]))
@@ -74,6 +40,7 @@ def main() -> int:
             **context,
             "completed_at": datetime.now(timezone.utc).isoformat(),
             "examples_added": bool(previous.get("examples_added")) or examples_added,
+            "central_examples_found": central_examples_found,
             "try_it_yourself_added": bool(previous.get("try_it_yourself_added")) or try_it_yourself_added,
             "devant_url": devant_url,
             "github_url": github_url,

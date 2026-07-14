@@ -32,7 +32,7 @@ An explicit package version is also supported:
 $generate-connector-example-docs generate an example guide for ballerinax/mysql:1.16.0
 ```
 
-The plugin creates a preserved sample project, six screenshots, a validated Markdown guide, deterministic **Try it yourself** links, and run metadata under `artifacts/<organization>-<package>/` in the repository where Codex is running. The links target the sample's canonical future location under `wso2/integration-samples/tree/main/integrator-default-profile/connectors/`; the plugin does not publish, commit, deploy, or create pull requests.
+The plugin creates a preserved sample project, six screenshots, a validated Markdown guide, deterministic **Try it yourself** links, a verbatim **More code examples** section from cached Ballerina Central metadata when available, and run metadata under `artifacts/<organization>-<package>/` in the repository where Codex is running. The links target the sample's canonical future location under `wso2/integration-samples/tree/main/integrator-default-profile/connectors/`; the plugin does not publish, commit, deploy, or create pull requests.
 
 ## Prerequisites
 

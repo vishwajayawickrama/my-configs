@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from append_central_examples import examples_from_metadata
 from inject_try_it_yourself import build_section, build_urls
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
@@ -108,6 +109,14 @@ def validate(context: dict) -> list[str]:
         follows_try = "try" in kinds and kinds.index("examples") == kinds.index("try") + 1
         if kinds[-1] != "examples" or not follows_try:
             errors.append("More code examples must immediately follow Try it yourself as the final H2 section.")
+
+    expected_examples = examples_from_metadata(Path(context["metadata_path"]))
+    examples_match = re.search(r"^## More code examples\n\n(?P<body>.*)\Z", text, re.M | re.S)
+    if expected_examples is None and examples_match:
+        errors.append("Guide contains More code examples but Central metadata has no examples.")
+    elif expected_examples is not None:
+        if not examples_match or examples_match.group("body").strip() != expected_examples:
+            errors.append("More code examples must exactly match the cached Ballerina Central metadata.")
 
     try_match = re.search(r"^## Try it yourself\n\n(?P<body>.*?)(?=^## |\Z)", text, re.M | re.S)
     try:
