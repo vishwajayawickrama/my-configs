@@ -114,7 +114,20 @@ def build_context(coordinate: str, root: Path, metadata: dict) -> dict:
         "context_path": str(context_path),
         "prepared_at": datetime.now(timezone.utc).isoformat(),
         "prerequisites": prerequisite_status(),
-        "code_server": {"port": 8080, "started_by_run": False, "pid": None},
+        "browser": {
+            "expected_viewport": {"width": 1720, "height": 968},
+            "preflight": None,
+            "closed_at": None,
+        },
+        "code_server": {
+            "endpoint": None,
+            "port": None,
+            "process_group": None,
+            "pid": None,
+            "started_by_run": False,
+            "user_data_dir": None,
+            "workspace": None,
+        },
     }
     context_path.write_text(json.dumps(context, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return context

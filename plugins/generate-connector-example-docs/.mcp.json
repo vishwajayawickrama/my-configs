@@ -5,9 +5,10 @@
       "args": [
         "-y",
         "@playwright/mcp@0.0.78",
+        "--browser=chromium",
         "--headless",
         "--isolated",
-        "--viewport-size=1720,968",
+        "--viewport-size=1720x968",
         "--output-mode=stdout"
       ]
     }

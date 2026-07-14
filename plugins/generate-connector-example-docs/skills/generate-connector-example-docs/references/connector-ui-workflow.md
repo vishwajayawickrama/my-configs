@@ -14,7 +14,7 @@
 ## Operating rules
 
 - Work only through the WSO2 Integrator low-code UI in code-server, except for inspecting or minimally repairing the generated sample files.
-- Use `browser_snapshot` before every interaction. Use screenshot calls only for the six documentation milestones.
+- Use `browser_snapshot` before every interaction. Use `browser_take_screenshot` once for the mandatory startup preflight and then only for the six documentation milestones.
 - Use targets or element references from the latest snapshot. Refresh the snapshot after navigation, saving, opening a panel, or any failed interaction.
 - Close helper panels, dropdowns, dialogs, source tabs, and overlays before screenshots unless the named milestone requires that panel.
 - Never allow the global VS Code secondary sidebar, Chat/Copilot panel, integrated terminal, Welcome tab, or unrelated editor tab to appear in a milestone screenshot.
@@ -27,6 +27,13 @@
 ## Clean the VS Code workspace
 
 Treat workspace cleanup as a blocking gate. Do not begin connector work or take screenshot 01 until every verification below passes.
+
+### Isolated browser and workspace preflight
+
+1. The first browser tool call of every run must be `browser_close`. Do not inspect or reuse a page left by a previous run.
+2. Run `start_code_server.py` and navigate only to its returned `workspace_url`; it must contain this run's exact encoded `sample_dir` value.
+3. Take a preflight screenshot before interacting with the UI. Run `validate_browser_preflight.py` with that screenshot and the current browser URL. It must confirm the exact workspace and `1720x968` viewport.
+4. If preflight fails, stop UI work. Do not change the viewport, reuse an existing server, or capture milestone screenshots. Run the failure cleanup sequence.
 
 ### Before opening WSO2 Integrator
 
@@ -189,3 +196,4 @@ Every milestone screenshot must exclude the global Chat/Copilot secondary sideba
 - If a configurable is injected into the wrong field, restore that field from the helper panel before continuing.
 - If code-server or the extension crashes, preserve logs and artifacts, restart only infrastructure owned by this run, and resume from the latest verified milestone.
 - If the package or connector card cannot be found, stop with evidence rather than substituting a different connector.
+- On completion, failure, or a recoverable partial stop, call `browser_close` and then `cleanup_run.py` with the matching status. This closes the isolated browser session and stops only the code-server process recorded for this run.

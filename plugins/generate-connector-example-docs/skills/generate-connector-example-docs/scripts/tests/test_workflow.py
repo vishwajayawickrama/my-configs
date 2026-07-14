@@ -10,11 +10,15 @@ SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
 
 from append_central_examples import append_central_examples, examples_from_metadata, extract_examples
+from cleanup_run import cleanup
 from collect_screenshot import collect
 from crop_screenshots import crop_directory
 from inject_try_it_yourself import build_section, build_urls, inject_try_it_yourself
 from prepare_run import build_context, central_url, parse_coordinate, safe_slug
+from run_lifecycle import matches_workspace_url, workspace_url
+from start_code_server import build_command
 from validate_output import validate
+from validate_browser_preflight import validate_preflight
 
 PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
@@ -121,8 +125,70 @@ class CoordinateTests(unittest.TestCase):
             self.assertEqual(context["sample_name"], "sap_business_one_connector_sample")
             self.assertEqual(Path(context["sample_dir"]).name, context["sample_name"])
 
+    def test_context_has_isolated_lifecycle_defaults(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context("ballerinax/mysql", Path(temp), {"version": "1.2.3"})
+            self.assertEqual(context["browser"]["expected_viewport"], {"width": 1720, "height": 968})
+            self.assertIsNone(context["code_server"]["endpoint"])
+            self.assertFalse(context["code_server"]["started_by_run"])
+
 
 class WorkflowTests(unittest.TestCase):
+    def test_playwright_mcp_contract(self):
+        config = json.loads((SCRIPTS.parents[2] / ".mcp.json").read_text(encoding="utf-8"))
+        args = config["mcpServers"]["playwright"]["args"]
+        for required in ("--browser=chromium", "--headless", "--isolated", "--viewport-size=1720x968"):
+            self.assertIn(required, args)
+
+    def test_isolated_startup_and_cleanup_contract(self):
+        skill = SCRIPTS.parent
+        instructions = (skill / "SKILL.md").read_text(encoding="utf-8")
+        workflow = (skill / "references" / "connector-ui-workflow.md").read_text(encoding="utf-8")
+        self.assertLess(instructions.index("scripts/start_code_server.py"), instructions.index("browser_close"))
+        self.assertLess(instructions.index("browser_close"), instructions.index("validate_browser_preflight.py"))
+        self.assertIn("cleanup_run.py --context CONTEXT_PATH --status completed --browser-closed", instructions)
+        self.assertIn("The first browser tool call of every run must be `browser_close`", workflow)
+        self.assertIn("1720x968", workflow)
+
+    def test_workspace_url_and_code_server_command(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context("ballerinax/mysql", Path(temp), {"version": "1.2.3"})
+            context["code_server"]["endpoint"] = "http://127.0.0.1:45678"
+            url = workspace_url(context)
+            self.assertTrue(url.startswith("http://127.0.0.1:45678/?folder="))
+            self.assertTrue(matches_workspace_url(url, context["sample_dir"]))
+            self.assertFalse(matches_workspace_url("http://127.0.0.1:45678/", context["sample_dir"]))
+            command = build_command(context, 45678, Path(temp) / "profile")
+            self.assertIn("--bind-addr", command)
+            self.assertIn("127.0.0.1:45678", command)
+            self.assertIn("--user-data-dir", command)
+            self.assertIn("--ignore-last-opened", command)
+            self.assertIn(context["sample_parent_dir"], command)
+
+    def test_preflight_validation_and_cleanup_record(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest("Pillow is not installed")
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context("ballerinax/mysql", Path(temp), {"version": "1.2.3"})
+            context_path = Path(context["context_path"])
+            context["code_server"]["endpoint"] = "http://127.0.0.1:45678"
+            context_path.write_text(json.dumps(context), encoding="utf-8")
+            image = Path(temp) / "preflight.png"
+            Image.new("RGB", (1720, 968), "white").save(image)
+            result = validate_preflight(context_path, image, workspace_url(context))
+            self.assertTrue(result["workspace_matches"])
+            self.assertTrue(result["viewport_matches"])
+            Image.new("RGB", (100, 100), "white").save(image)
+            with self.assertRaisesRegex(ValueError, "Browser viewport"):
+                validate_preflight(context_path, image, workspace_url(context))
+            cleanup_result = cleanup(context_path, "partial", browser_closed=True)
+            self.assertEqual(cleanup_result["reason"], "not-owned")
+            updated = json.loads(context_path.read_text(encoding="utf-8"))
+            self.assertIsNotNone(updated["browser"]["closed_at"])
+            self.assertTrue((Path(updated["run_log_dir"]) / "cleanup.json").is_file())
+
     def test_canonical_document_template_contract(self):
         skill = SCRIPTS.parent
         template = (skill / "assets" / "templates" / "connector-example-doc.md").read_text(encoding="utf-8")
