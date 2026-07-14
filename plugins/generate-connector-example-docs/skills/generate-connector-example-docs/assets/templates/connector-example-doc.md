@@ -91,4 +91,4 @@ Add a log action for the returned value, then return to the visual flow.
 
 ![Completed {{CONNECTOR_DISPLAY_NAME}} flow with the configured operation](../screenshots/{{SCREENSHOT_PREFIX}}_screenshot_06_completed_flow.png)
 
-<!-- Do not add "More code examples". The finalization script appends it when verified Central examples exist. -->
+<!-- Do not author "Try it yourself" or "More code examples". Finalization adds both sections deterministically. -->

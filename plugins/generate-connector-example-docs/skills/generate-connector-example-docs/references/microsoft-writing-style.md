@@ -30,6 +30,7 @@ Apply every rule before finalization. The rules are ported from the connector do
 - Put code elements, values, variables, types, connection strings, ports, file paths, and environment variables in backticks. Don't add backticks inside bold parameter labels.
 - Use only these admonition labels: `> **Note:**`, `> **Tip:**`, `> **Warning:**`, and `> **Important:**`. Prefer normal prose when an admonition isn't necessary.
 - Use descriptive link text. Never use “click here,” “here,” “this page,” “this guide,” or “learn more” as link text.
+- Preserve the deterministic **Deploy to Devant** image link and **View source on GitHub** link exactly; they are post-processing output rather than authored instructions.
 
 ## Connector-document rules
 

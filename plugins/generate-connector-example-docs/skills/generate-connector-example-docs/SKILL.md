@@ -24,9 +24,9 @@ Reject a bare package name. Treat an omitted version as `latest`. Accept optiona
 4. Reuse a healthy code-server on a user-specified port or port 8080. Otherwise start `code-server --auth none --bind-addr 127.0.0.1:PORT SAMPLE_PARENT`, redirect output to `run-log/code-server.log`, and record its PID. Stop only a server started by this run.
 5. Read `references/connector-ui-workflow.md` completely before browser interaction. Complete its clean-workspace gate before connector work: close the global Chat/Copilot secondary sidebar, integrated terminal, Welcome tab, unrelated editor/source tabs, and transient popups while keeping the WSO2 Integrator visual editor open. Do not capture screenshot 01 until a fresh snapshot verifies the clean frame. Follow the reference through all six milestones. Use the bundled `playwright` MCP tools; do not use unsafe browser code execution.
 6. After every `browser_take_screenshot` call, immediately run `scripts/collect_screenshot.py RETURNED_PATH SCREENSHOTS_DIR/FILENAME`. Keep filenames sequential from `01` through `06`.
-7. Make `sample_dir` the project root: `Ballerina.toml` and the generated `.bal` files must live directly within it. If the UI creates a named project elsewhere or one level deeper, copy that project's contents into `sample_dir` before finalization.
+7. Create the integration using the context's exact `sample_name` at `sample_dir`. Make `sample_dir` the project root: `Ballerina.toml` and the generated `.bal` files must live directly within it. Do not rename the directory or add a suffix. If the UI creates the project elsewhere or one level deeper, copy its contents into `sample_dir` before finalization.
 8. Read `references/documentation-contract.md` and `references/microsoft-writing-style.md` completely before writing. Copy `assets/templates/connector-example-doc.md` to `doc_path`, then replace every placeholder with facts from the completed workflow. Remove template comments and inapplicable conditional sections. Do not author from a blank file, create an intermediate execution prompt, or use a second model for enforcement.
-9. Run `scripts/finalize_run.py --context CONTEXT_PATH`. If it reports validation failures, correct the guide or artifacts and rerun until it succeeds.
+9. Run `scripts/finalize_run.py --context CONTEXT_PATH`. It deterministically injects **Try it yourself**, appends verified Central examples, and validates the output. If it reports failures, correct the guide or artifacts and rerun until it succeeds.
 10. Stop the code-server process only when this run started it. Report the guide, screenshot directory, sample directory, resolved package version, and validation status.
 
 ## Safety and boundaries
@@ -34,6 +34,6 @@ Reject a bare package name. Treat an omitted version as `latest`. Accept optiona
 - Keep all generated files under `artifacts/<organization>-<package>/` in the invocation root.
 - Never overwrite a prior run automatically.
 - Never put credentials or secret values in the guide, screenshots, sample, logs, or config files. Leave configurable values empty or use obvious non-secret placeholders.
-- Do not add `Try it yourself` links because this workflow does not publish the sample.
+- Generate **Try it yourself** links only through the finalization script. The links target the canonical future sample location; they do not publish the sample.
 - Do not create branches, commits, pushes, deployments, issues, or pull requests.
 - Do not support trigger packages or batch queues in this skill.

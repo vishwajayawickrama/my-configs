@@ -29,9 +29,10 @@ Use exactly these H2 sections in this order, replacing bracketed names:
 5. `## Adding the [Connector name] connector`
 6. `## Configuring the [Connector name] connection`
 7. `## Configuring the [Connector name] [Operation name] operation`
-8. `## More code examples` only when appended from the Central README
+8. `## Try it yourself`, added only by deterministic finalization
+9. `## More code examples` only when appended from the Central README
 
-Do not add a summary, conclusion, next steps, metadata, frontmatter, timestamp footer, or `Try it yourself` section.
+Do not add a summary, conclusion, next steps, metadata, frontmatter, or timestamp footer. Do not author **Try it yourself** manually; finalization inserts its exact Markdown.
 
 ## Section content
 
@@ -63,7 +64,23 @@ Include only binding connection parameters, saving the connection, and reviewing
 
 ### Configuring the operation
 
-Keep entry-point creation as its own step. Combine operation selection and parameter configuration when that reads clearly, while keeping screenshot 04 with the expanded-operation action and screenshot 05 with the filled form. Finish with the saved flow and screenshot 06. Add no closing prose after this section unless deterministic post-processing appends **More code examples**.
+Keep entry-point creation as its own step. Combine operation selection and parameter configuration when that reads clearly, while keeping screenshot 04 with the expanded-operation action and screenshot 05 with the filled form. Finish with the saved flow and screenshot 06. Add no closing prose; deterministic post-processing appends **Try it yourself** and optional **More code examples**.
+
+### Try it yourself
+
+Finalization must add this section immediately after the operation section and before optional **More code examples**:
+
+```markdown
+## Try it yourself
+
+Try this sample in WSO2 Integration Platform.
+
+[![Deploy to Devant](https://openindevant.choreoapps.dev/images/DeployDevant-White.svg)](https://console.devant.dev/new?gh=wso2/integration-samples/tree/main/integrator-default-profile/connectors/<sample_name>)
+
+[View source on GitHub](https://github.com/wso2/integration-samples/tree/main/integrator-default-profile/connectors/<sample_name>)
+```
+
+Use the exact directory basename from `sample_dir` for `<sample_name>`. This fenced block documents the post-processing contract; it must not appear as a fence in the generated guide.
 
 ## Step format
 
@@ -117,7 +134,7 @@ Remove all references to:
 - Playwright, MCP tools, browser tool names, automation internals, snapshots, or agent instructions
 - `.bal` filenames or source-editing mechanics
 - real secrets or credential values
-- publishing, branches, commits, pull requests, GitHub sample URLs, or Devant deployment buttons
+- publishing, branches, commits, or pull requests, except the exact deterministic GitHub sample URL and Devant deployment button in **Try it yourself**
 - WSO2 Integrator BI; use **WSO2 Integrator**
 - Ballerina as the end-user platform name
 
@@ -137,3 +154,4 @@ Before finalization, verify that:
 8. The final deterministic validator succeeds.
 9. No template placeholder or HTML comment remains.
 10. Every objective Microsoft writing-style rule passes validation, and the remaining prose rules have been reviewed manually.
+11. **Try it yourself** contains the exact button and GitHub URLs for the `sample_dir` basename.

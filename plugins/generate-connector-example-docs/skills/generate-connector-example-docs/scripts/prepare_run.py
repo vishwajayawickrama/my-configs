@@ -72,6 +72,7 @@ def build_context(coordinate: str, root: Path, metadata: dict) -> dict:
     resolved_version = str(metadata.get("version") or requested_version)
     slug = safe_slug(org, package)
     image_prefix = safe_slug(org, package, separator="_")
+    sample_name = f"{safe_slug(package, separator='_')}_connector_sample"
     run_dir = (root / "artifacts" / slug).resolve()
     if run_dir.exists() and any(run_dir.iterdir()):
         raise FileExistsError(
@@ -83,7 +84,8 @@ def build_context(coordinate: str, root: Path, metadata: dict) -> dict:
         "run_dir": run_dir,
         "workflow_docs_dir": run_dir / "workflow-docs",
         "screenshots_dir": run_dir / "screenshots",
-        "sample_dir": run_dir / "sample",
+        "sample_parent_dir": run_dir / "sample",
+        "sample_dir": run_dir / "sample" / sample_name,
         "run_log_dir": run_dir / "run-log",
     }
     for path in paths.values():
@@ -104,6 +106,7 @@ def build_context(coordinate: str, root: Path, metadata: dict) -> dict:
         "central_url": central_url(org, package, requested_version),
         "slug": slug,
         "image_prefix": image_prefix,
+        "sample_name": sample_name,
         "invocation_root": str(root.resolve()),
         **{name: str(path) for name, path in paths.items()},
         "doc_path": str(doc_path),

@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from inject_try_it_yourself import build_section, build_urls
+
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 BANNED = {
     "code-server": re.compile(r"code-server", re.I),
@@ -19,8 +21,7 @@ BANNED = {
     ),
     "local filesystem paths": re.compile(r"(?:/Users/|/home/|/workspace/|~/|artifacts/|[A-Za-z]:\\)"),
     ".bal references": re.compile(r"\b[^\s`]+\.bal\b", re.I),
-    "publishing/PR content": re.compile(r"\b(?:pull request|create a pr|deploy to devant)\b", re.I),
-    "Try it yourself": re.compile(r"^## Try it yourself\s*$", re.I | re.M),
+    "publishing/PR content": re.compile(r"\b(?:pull request|create a pr)\b", re.I),
     "WSO2 Integrator BI": re.compile(r"WSO2 Integrator BI", re.I),
     "wordy phrasing": re.compile(
         r"\b(?:in order to|utili[sz]e|make use of|at this point in time|please note that)\b", re.I
@@ -51,6 +52,8 @@ def h2_kind(heading: str) -> Optional[str]:
         return "connection"
     if re.fullmatch(r"Configuring the .+ .+ operation", heading):
         return "operation"
+    if heading == "Try it yourself":
+        return "try"
     if heading == "More code examples":
         return "examples"
     return None
@@ -64,7 +67,7 @@ def validate(context: dict) -> list[str]:
     if not doc_path.is_file():
         return [f"Missing guide: {doc_path}"]
     text = doc_path.read_text(encoding="utf-8")
-    authored_text = re.split(r"^## More code examples\s*$", text, maxsplit=1, flags=re.M)[0]
+    authored_text = re.split(r"^## Try it yourself\s*$", text, maxsplit=1, flags=re.M)[0]
     if not text.startswith("# Example\n"):
         errors.append("The guide must start at byte zero with '# Example'.")
     if re.search(r"\{\{[A-Z0-9_]+\}\}|<!--", authored_text):
@@ -89,15 +92,35 @@ def validate(context: dict) -> list[str]:
         unknown = [heading for heading, kind in zip(headings, kinds) if kind is None]
         errors.append(f"Unexpected H2 section(s): {', '.join(unknown)}")
     required = ["what", "architecture", "setup", "adding", "connection", "operation"]
-    filtered = [kind for kind in kinds if kind not in ("prerequisites", "examples", None)]
+    filtered = [kind for kind in kinds if kind not in ("prerequisites", "try", "examples", None)]
     if filtered != required:
         errors.append(f"Required H2 order is invalid: {filtered}")
-    if kinds.count("prerequisites") > 1 or kinds.count("examples") > 1:
-        errors.append("Optional H2 sections may appear at most once.")
+    if kinds.count("prerequisites") > 1 or kinds.count("try") != 1 or kinds.count("examples") > 1:
+        errors.append("Prerequisites and examples may appear at most once; Try it yourself must appear exactly once.")
     if "prerequisites" in kinds and kinds.index("prerequisites") != 2:
         errors.append("Prerequisites must follow Architecture.")
-    if "examples" in kinds and kinds[-1] != "examples":
-        errors.append("More code examples must be the final H2 section.")
+    if "try" in kinds:
+        try_index = kinds.index("try")
+        operation_index = kinds.index("operation") if "operation" in kinds else -1
+        if try_index != operation_index + 1:
+            errors.append("Try it yourself must immediately follow the operation section.")
+    if "examples" in kinds:
+        follows_try = "try" in kinds and kinds.index("examples") == kinds.index("try") + 1
+        if kinds[-1] != "examples" or not follows_try:
+            errors.append("More code examples must immediately follow Try it yourself as the final H2 section.")
+
+    try_match = re.search(r"^## Try it yourself\n\n(?P<body>.*?)(?=^## |\Z)", text, re.M | re.S)
+    try:
+        expected_try = build_section(context["sample_name"])
+        build_urls(context["sample_name"])
+    except ValueError as exc:
+        expected_try = ""
+        errors.append(str(exc))
+    actual_try = "## Try it yourself\n\n" + try_match.group("body").strip() if try_match else ""
+    if actual_try != expected_try:
+        errors.append("Try it yourself section or its deterministic links are invalid.")
+    if sample_dir.name != context["sample_name"]:
+        errors.append("Sample directory name must exactly match context sample_name.")
 
     setup_match = re.search(
         r"^## Setting up the .+ integration\n\n(?P<body>.*?)(?=^## )", text, re.M | re.S

@@ -1,5 +1,6 @@
 import base64
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -11,6 +12,7 @@ sys.path.insert(0, str(SCRIPTS))
 from collect_screenshot import collect
 from crop_screenshots import crop_directory
 from finalize_run import append_examples, extract_examples
+from inject_try_it_yourself import build_section, build_urls, inject_try_it_yourself
 from prepare_run import build_context, central_url, parse_coordinate, safe_slug
 from validate_output import validate
 
@@ -111,6 +113,14 @@ class CoordinateTests(unittest.TestCase):
         )
         self.assertEqual(safe_slug("ballerinax", "sap.businessone"), "ballerinax-sap-businessone")
 
+    def test_sample_name_and_directory_are_authoritative(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context(
+                "ballerinax/sap-business.one", Path(temp), {"version": "1.2.3"}
+            )
+            self.assertEqual(context["sample_name"], "sap_business_one_connector_sample")
+            self.assertEqual(Path(context["sample_dir"]).name, context["sample_name"])
+
 
 class WorkflowTests(unittest.TestCase):
     def test_canonical_document_template_contract(self):
@@ -175,7 +185,64 @@ class WorkflowTests(unittest.TestCase):
             sample = Path(context["sample_dir"])
             (sample / "Ballerina.toml").write_text("[package]\norg='test'\nname='sample'\nversion='0.1.0'\n", encoding="utf-8")
             (sample / "main.bal").write_text("public function main() {}\n", encoding="utf-8")
+            self.assertTrue(
+                inject_try_it_yourself(
+                    Path(context["doc_path"]), sample, context["sample_name"]
+                )
+            )
             self.assertEqual(validate(context), [])
+
+    def test_try_it_yourself_markdown_sandbox_and_idempotency(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            context = build_context("ballerinax/mysql", root, {"version": "1.2.3"})
+            doc = Path(context["doc_path"])
+            doc.write_text("# Example\n\n## Operation\n\nDone.\n", encoding="utf-8")
+            sample = Path(context["sample_dir"])
+            self.assertTrue(inject_try_it_yourself(doc, sample, context["sample_name"]))
+            self.assertFalse(inject_try_it_yourself(doc, sample, context["sample_name"]))
+            self.assertEqual(doc.read_text(encoding="utf-8").count("## Try it yourself"), 1)
+            self.assertIn(build_section("mysql_connector_sample"), doc.read_text(encoding="utf-8"))
+            devant_url, github_url = build_urls("mysql_connector_sample")
+            expected_path = "integrator-default-profile/connectors/mysql_connector_sample"
+            self.assertTrue(devant_url.endswith(expected_path))
+            self.assertTrue(github_url.endswith(expected_path))
+
+    def test_try_it_yourself_precedes_examples(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context("ballerinax/mysql", Path(temp), {"version": "1.2.3"})
+            doc = Path(context["doc_path"])
+            doc.write_text("# Example\n\n## More code examples\n\nExample.\n", encoding="utf-8")
+            inject_try_it_yourself(doc, Path(context["sample_dir"]), context["sample_name"])
+            text = doc.read_text(encoding="utf-8")
+            self.assertLess(text.index("## Try it yourself"), text.index("## More code examples"))
+
+    def test_finalizer_records_deterministic_sample_links(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            context = build_context("ballerinax/mysql", root, {"version": "1.2.3", "readme": ""})
+            prefix = context["image_prefix"]
+            source = root / "source.png"
+            source.write_bytes(PNG)
+            for number, suffix in enumerate(
+                ["palette", "connection_form", "connections_list", "operations_panel", "operation_form", "completed_flow"], 1
+            ):
+                collect(source, Path(context["screenshots_dir"]) / f"{prefix}_screenshot_{number:02d}_{suffix}.png")
+            Path(context["doc_path"]).write_text(valid_document(prefix), encoding="utf-8")
+            sample = Path(context["sample_dir"])
+            (sample / "Ballerina.toml").write_text("[package]\norg='test'\nname='sample'\nversion='0.1.0'\n", encoding="utf-8")
+            (sample / "main.bal").write_text("public function main() {}\n", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(SCRIPTS / "finalize_run.py"), "--context", context["context_path"], "--skip-crop"],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            run = json.loads((Path(context["run_log_dir"]) / "run.json").read_text(encoding="utf-8"))
+            self.assertTrue(run["try_it_yourself_added"])
+            self.assertEqual(run["sample_name"], "mysql_connector_sample")
+            self.assertTrue(run["devant_url"].endswith("/mysql_connector_sample"))
+            self.assertTrue(run["github_url"].endswith("/mysql_connector_sample"))
 
     def test_validator_rejects_template_and_style_leaks(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -194,6 +261,7 @@ class WorkflowTests(unittest.TestCase):
             sample = Path(context["sample_dir"])
             (sample / "Ballerina.toml").write_text("[package]\norg='test'\nname='sample'\nversion='0.1.0'\n", encoding="utf-8")
             (sample / "main.bal").write_text("public function main() {}\n", encoding="utf-8")
+            inject_try_it_yourself(Path(context["doc_path"]), sample, context["sample_name"])
             errors = validate(context)
             self.assertTrue(any("template placeholders" in error for error in errors))
             self.assertTrue(any("nonpreferred UI terminology" in error for error in errors))
@@ -230,6 +298,19 @@ class WorkflowTests(unittest.TestCase):
             self.assertTrue(append_examples(doc, metadata))
             self.assertFalse(append_examples(doc, metadata))
             self.assertEqual(doc.read_text(encoding="utf-8").count("## More code examples"), 1)
+
+    def test_rejects_old_or_mismatched_try_it_yourself_links(self):
+        with tempfile.TemporaryDirectory() as temp:
+            context = build_context("ballerinax/mysql", Path(temp), {"version": "1.2.3"})
+            doc = Path(context["doc_path"])
+            doc.write_text("# Example\n", encoding="utf-8")
+            inject_try_it_yourself(doc, Path(context["sample_dir"]), context["sample_name"])
+            old = doc.read_text(encoding="utf-8").replace(
+                "integrator-default-profile/connectors/", "connectors/"
+            )
+            doc.write_text(old, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                inject_try_it_yourself(doc, Path(context["sample_dir"]), context["sample_name"])
 
 
 if __name__ == "__main__":

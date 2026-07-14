@@ -73,8 +73,8 @@ Build the project without calling the external service. The goal is a valid inte
 ## Project creation
 
 1. Complete the **Before opening WSO2 Integrator** cleanup gate.
-2. Open WSO2 Integrator and create a new integration under the run's `sample_dir`.
-3. Use a filesystem-safe project name derived from the package, ending in `_connector_sample`.
+2. Read `sample_name` and `sample_dir` from the run context.
+3. Open WSO2 Integrator and create the new integration at `sample_dir` using `sample_name` exactly. Do not add a suffix or choose another directory name.
 4. Wait until the integration design surface is fully loaded.
 5. Complete the **After the integration opens** cleanup gate.
 6. Confirm the project tree and design canvas are visible before adding artifacts.

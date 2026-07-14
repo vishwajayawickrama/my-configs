@@ -1,7 +1,7 @@
 {
   "name": "generate-connector-example-docs",
-  "version": "0.1.0+codex.20260714175051",
-  "description": "Generate validated WSO2 Integrator connector example guides, screenshots, and sample projects from Ballerina Central packages.",
+  "version": "0.1.0+codex.20260714181156",
+  "description": "Generate validated WSO2 Integrator connector example guides, screenshots, sample projects, and deterministic sample links from Ballerina Central packages.",
   "author": {
     "name": "vishwajayawickrama",
     "email": "pmvishwajayawickrama@gmail.com",
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Generate Connector Example Docs",
     "shortDescription": "Generate connector guides with verified UI screenshots",
-    "longDescription": "Create a WSO2 Integrator connector sample through the low-code UI, capture six reproducible screenshots, and produce validated example documentation from a full Ballerina Central package coordinate.",
+    "longDescription": "Create a WSO2 Integrator connector sample through the low-code UI, capture six reproducible screenshots, and produce validated example documentation with deterministic Devant and GitHub links from a full Ballerina Central package coordinate.",
     "developerName": "vishwajayawickrama",
     "category": "Developer Tools",
     "capabilities": [
