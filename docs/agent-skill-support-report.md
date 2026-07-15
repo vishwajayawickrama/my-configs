@@ -10,7 +10,7 @@
 |---|---|---|---|---|---|---|
 | **Claude Code** | ✅ Native | `.claude/skills/` (project), `~/.claude/skills/` (global) | ✅ Native | Skills, agents, commands, hooks, MCP servers | ✅ Native | `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json`; `/plugin marketplace add`, `/plugin install` |
 | **OpenAI Codex (CLI + ChatGPT)** | ✅ Native | REPO/USER/ADMIN/SYSTEM tiers; `.agents/skills/`, `~/.codex/skills/` | ✅ Native (added ~Mar 2026) | Skills, MCP servers, "apps" (connectors), hooks | ✅ Native | `.codex-plugin/plugin.json`; repo-scoped or personal `marketplace.json` under `.agents/plugins/`; `/plugins` in CLI |
-| **Google Antigravity** | ✅ Native | `.agent/skills/` (project), `~/.agents/skills/` (global) | ❌ No native plugin system | — | ❌ No native marketplace | Skills-only; relies on symlink/clone install or third-party libraries. No `.antigravity-plugin/`-style manifest exists. |
+| **Google Antigravity** | ✅ Native | `.agents/skills/` (project); `~/.gemini/config/skills/` (IDE global); `~/.gemini/antigravity-cli/skills/` (CLI global); legacy `.agent/skills/` supported | ✅ Native | Skills, rules, MCP servers, hooks | ⚠️ Built-in catalog, no open third-party marketplace | Custom plugins use `.agents/plugins/` (workspace), `~/.gemini/config/plugins/` (IDE global), or `~/.gemini/antigravity-cli/plugins/` (CLI global). |
 | **OpenCode** | ✅ Native (via Agent Skills spec) | `.agents/skills/` (aliases with other tools) | ✅ Native (JS/TS plugin modules) | Custom tools, hooks (event/lifecycle), auth providers — **not** a bundling format for skills | ⚠️ Community only | No first-party marketplace; community sites (opencode.cafe) and third-party CLIs (`opencode-marketplace`) fill the gap |
 | **Cursor** | ✅ Native | `.cursor/skills/` (project), global config dir | ✅ Native (added ~Feb 2026) | Skills, rules, subagents, MCP servers, hooks | ✅ Native, curated | `.cursor-plugin/marketplace.json` + `.cursor-plugin/plugin.json`; manually reviewed before listing at cursor.com/marketplace |
 | **Gemini CLI** | ✅ Native | `.gemini/skills/` or `.agents/skills/` alias (project/user) | ⚠️ "Extensions" only (broader, older concept) | MCP servers, context files (`GEMINI.md`), slash commands, skills | ⚠️ Extensions Gallery (not a true plugin marketplace) | No `marketplace.json`; one Git repo = one extension installed via `gemini extensions install <url>` |
@@ -28,7 +28,7 @@ The reference implementation most others have converged toward. A marketplace re
 Codex shipped a native plugin system in **March 2026**, converging on the same three-layer shape as Claude Code and Cursor: skill (workflow), app (service connector), MCP server (custom tools). Manifest is `.codex-plugin/plugin.json`; marketplaces are `marketplace.json` files, either repo-scoped (`$REPO_ROOT/.agents/plugins/marketplace.json`) or personal (`~/.agents/plugins/marketplace.json`). OpenAI's own `$plugin-creator` skill scaffolds a plugin and a local marketplace entry. Distinct from **ChatGPT Apps/Connectors**, which is a separate, broader ecosystem.
 
 ### Google Antigravity
-Antigravity supports the open Agent Skills spec directly (`.agent/skills/` project-level, `~/.agents/skills/` global), but **has no first-party plugin or marketplace concept**. Third-party projects (e.g., community "awesome skills" repositories) fill this gap by generating Claude Code/Codex-style plugin bundles and instructing Antigravity users to symlink or clone the skills directory manually. Confirmed directly in community documentation: *"This architecture is exclusive to Claude Code CLI. Other AI tools (Antigravity IDE, Gemini CLI, Cursor IDE, etc.) use symbolic link installation only."*
+Antigravity supports the open Agent Skills spec directly. The current workspace path is `.agents/skills/`, while `.agent/skills/` remains a backward-compatible alias. Global paths differ by surface: the IDE uses `~/.gemini/config/skills/`, while Antigravity CLI uses `~/.gemini/antigravity-cli/skills/`. It also supports native plugins that bundle skills, rules, MCP servers, and hooks, with corresponding workspace, IDE-global, and CLI-global plugin locations. Antigravity provides built-in customization catalogs, but its documentation does not define an open third-party marketplace manifest comparable to Claude Code or Codex.[19][20][21]
 
 ### OpenCode
 OpenCode's "plugin" concept is different in kind from the others: a plugin is a **JavaScript/TypeScript module** that hooks into lifecycle events (`tool.execute.before`, `chat.message`, `session.idle`, etc.) or registers custom tools/auth providers — it is a code-extension mechanism, not a skill-bundling format. Skills are supported separately via the Agent Skills spec. There is no official OpenCode marketplace; the ecosystem relies on community sites (opencode.cafe) and unofficial CLIs.
@@ -50,10 +50,10 @@ Not a harness itself — a **distribution tool** that installs bare `SKILL.md` s
 ## Similarities Across Harnesses
 
 1. **Shared foundation — the open Agent Skills spec.** Every harness above reads the same artifact: a folder with a `SKILL.md` containing YAML frontmatter (`name`, `description`) plus markdown instructions and optional scripts/references. This is what makes cross-tool distribution (`npx skills add`) possible at all.
-2. **Convergent three-layer plugin architecture.** Claude Code, Codex, Cursor, and Copilot have all converged on essentially the same shape: **skill** (workflow/instructions) + **MCP server** (tool access) + optional **hooks/agents/commands**, bundled under a `plugin.json`-style manifest.
+2. **Convergent three-layer plugin architecture.** Claude Code, Codex, Antigravity, Cursor, and Copilot have all converged on essentially the same shape: **skill** (workflow/instructions) + **MCP server** (tool access) + optional **hooks/agents/commands/rules**, bundled under a `plugin.json`-style manifest.
 3. **`marketplace.json` as the recurring distribution primitive.** Claude Code, Codex, Cursor, and Copilot all use a `marketplace.json` file (in slightly different paths: `.claude-plugin/`, `.agents/plugins/`, `.cursor-plugin/`, `.github/plugin/`) listing one or more plugins by name and source path — different vendors, nearly identical idea.
 4. **Consistent CLI/slash-command install pattern.** `<tool> plugin marketplace add <repo>` → `<tool> plugin install <name>@<marketplace>` (or the equivalent `/plugin` slash commands) shows up nearly verbatim across Claude Code, Codex, and Copilot.
-5. **Antigravity, Gemini CLI, and OpenCode are the outliers.** All three support skills natively but lack a true plugin-manifest-based marketplace — Antigravity has neither plugins nor marketplaces, Gemini CLI has "Extensions" (an older, coarser unit — one repo = one extension) instead, and OpenCode's "plugin" is a different concept entirely (a JS/TS code hook, not a skill bundle).
+5. **Marketplace support still differs.** Antigravity now has plugin bundles and built-in customization catalogs but no documented open third-party marketplace manifest; Gemini CLI uses Extensions, and OpenCode's plugin is a JS/TS lifecycle extension rather than a skill bundle.
 6. **Versioning/update mechanics are inconsistent and mostly manual by default.** Where auto-update exists (Claude Code, Codex, Copilot), it's typically opt-in per user/marketplace rather than forced — teams wanting guaranteed currency generally still need an explicit update step or centrally managed settings.
 
 ---
@@ -95,3 +95,9 @@ Not a harness itself — a **distribution tool** that installs bare `SKILL.md` s
 [17] "Agent Skills, Plugins and Marketplace: The Complete Guide," *CodeBytes*. Available: https://chris-ayers.com/posts/agent-skills-plugins-marketplace/
 
 [18] "Agent Skills Overview," *Agent Skills*. Available: https://agentskills.io/home
+
+[19] Google, "Agent Skills," *Antigravity Documentation*. Available: https://antigravity.google/docs/skills
+
+[20] Google, "Plugins," *Antigravity Documentation*. Available: https://antigravity.google/docs/plugins
+
+[21] Google, "Plugins & skills," *Antigravity CLI Documentation*. Available: https://antigravity.google/docs/cli-plugins

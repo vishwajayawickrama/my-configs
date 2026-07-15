@@ -166,6 +166,60 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("Do not confuse the global VS Code Chat/Copilot secondary sidebar", cleanup)
         self.assertIn("do not hide these elements later by cropping the image", workflow)
 
+    def test_nested_automation_add_node_contract(self):
+        workflow = (SCRIPTS.parent / "references" / "connector-ui-workflow.md").read_text(encoding="utf-8")
+        add_node = workflow[
+            workflow.index("To activate a nested canvas **+** node:") : workflow.index(
+                "### Milestone 4: Expanded operations"
+            )
+        ]
+        required = [
+            "depth: 10",
+            "boxes: true",
+            "resolved flow-canvas reference",
+            "browser_evaluate",
+            "svg[data-testid='empty-node-add-button-1']",
+            'new MouseEvent("click"',
+            "bubbles: true",
+            "return `true`",
+            "elementFromPoint(x, y)",
+            "Never activate the node by coordinate",
+            "Immediately take a fresh snapshot",
+            "Select the saved connection using its new reference",
+            "Select the chosen operation using its refreshed reference",
+        ]
+        positions = [add_node.index(value) for value in required]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("all earlier element references are now stale", add_node)
+        self.assertIn("these discovery snapshots are not documentation milestones", add_node)
+        self.assertIn("Keep connection and operation names dynamic", add_node)
+
+    def test_wso2_primary_sidebar_invariant(self):
+        workflow = (SCRIPTS.parent / "references" / "connector-ui-workflow.md").read_text(encoding="utf-8")
+        invariant = workflow[
+            workflow.index("### WSO2 Integrator primary-sidebar invariant") : workflow.index(
+                "### Clean-frame gate before screenshot 01"
+            )
+        ]
+        required = [
+            "**Left primary sidebar:**",
+            "**Right global secondary sidebar:**",
+            "**Right WSO2 Integrator panel:**",
+            "before every browser interaction and every milestone screenshot",
+            "Never select **Toggle Primary Side Bar**",
+            "If the left project tree is absent",
+            "Select the visible **Toggle Primary Side Bar** layout control",
+            "select the WSO2 Integrator activity-bar icon",
+            "verify the project root, **Entry Points**, and **Connections** are visible",
+            "Treat all previous element references as stale",
+            "Do not capture any milestone screenshot until this invariant passes",
+        ]
+        positions = [invariant.index(value) for value in required]
+        self.assertEqual(positions, sorted(positions))
+        self.assertEqual(workflow.count("Pass the **WSO2 Integrator primary-sidebar invariant**."), 6)
+        self.assertIn("Every milestone screenshot must include the left WSO2 Integrator project tree", workflow)
+        self.assertIn("keep both side surfaces visible", workflow)
+
     def test_examples_extraction(self):
         readme = "# Package\n\n## Examples\n\nUse this example.\n\n## API Docs\nNope"
         self.assertEqual(extract_examples(readme), "Use this example.")

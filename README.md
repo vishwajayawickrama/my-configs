@@ -30,6 +30,7 @@ destination paths, plus any reload/restart step:
 
 | Config | What it is |
 |--------|------------|
+| [`.agents/`](.agents/) | Workspace skill and MCP discovery for Antigravity and other tools that support the shared `.agents/skills` convention. |
 | [`skills/`](skills/README.md) | Reusable agent skills (Claude Code, Codex, or anything that reads a skills directory). |
 | [`plugins/`](plugins/README.md) | Installable Codex plugins with bundled skills and MCP servers. |
 | [`ghostty/`](ghostty/README.md) | [Ghostty](https://ghostty.org) terminal configuration. |
