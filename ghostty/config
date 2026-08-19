@@ -66,3 +66,8 @@ palette = 12=#6871ff
 palette = 13=#ff76ff
 palette = 14=#5ffdff
 palette = 15=#ffffff
+
+# Start new windows and tabs from a fresh shell in the home directory.
+working-directory = home
+window-inherit-working-directory = false
+tab-inherit-working-directory = false

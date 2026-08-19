@@ -72,3 +72,5 @@ That's it — the symlinks already point at the updated files.
 | Skill | What it does |
 |-------|--------------|
 | `beej-guide` | Writes a full-length technical guide/book on any topic in the style of Beej's Guides (beej.us) — friendly voice, chapter projects, exercises, verified examples — producing PDF + split-per-chapter HTML. |
+| `video-to-slide-deck` | Extracts high-resolution, OCR-searchable PDF slide decks from lecture and presentation video recordings (MP4, MKV, MOV) with canvas auto-cropping, UI overlay removal, slide deduplication, and hierarchical Table of Contents bookmarks. |
+
