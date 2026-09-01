@@ -1,0 +1,118 @@
+% University of Moratuwa-style examination template.
+% Define metadata and \contentfile in a wrapper before inputting this file.
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,left=0.70in,right=0.70in,top=0.80in,bottom=0.85in,headheight=16pt,headsep=12pt,footskip=28pt]{geometry}
+\usepackage{graphicx}
+\usepackage{newtxtext,newtxmath}
+\usepackage{enumitem}
+\usepackage{array,tabularx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{refcount}
+\usepackage{microtype}
+\usepackage{amsmath}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\raggedbottom
+
+\providecommand{\modulecode}{XX 0000}
+\providecommand{\moduletitle}{MODULE TITLE}
+\providecommand{\faculty}{Faculty Name}
+\providecommand{\programme}{Degree Programme}
+\providecommand{\semesterline}{Semester Model Examination}
+\providecommand{\papernumber}{1}
+\providecommand{\paperdate}{Month Year}
+\providecommand{\timeallowed}{3 hours}
+\providecommand{\questioncount}{5}
+\providecommand{\totalmarks}{100}
+\providecommand{\assessmentweight}{70\%}
+\providecommand{\crestpath}{crest.png}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[R]{\small \modulecode}
+\fancyfoot[C]{\small Page \thepage\ of \pageref{LastPage}}
+\fancyfoot[R]{\small\itshape\ifnum\value{page}<\getpagerefnumber{LastPage} Continued...\fi}
+
+\newcommand{\coverpage}{%
+  \begingroup\small
+  \thispagestyle{fancy}
+  \vspace*{0.10in}
+  \noindent\begin{minipage}[c]{0.18\textwidth}
+    \centering\includegraphics[height=1.02in]{\crestpath}
+  \end{minipage}%
+  \begin{minipage}[c]{0.64\textwidth}
+    \centering
+    {\bfseries UNIVERSITY OF MORATUWA\par}
+    {\faculty\par}
+    \vspace{0.13in}
+    {\programme\par}
+    {\semesterline{} -- Paper \papernumber\par}
+    \vspace{0.13in}
+    {\bfseries \modulecode{} -- \MakeUppercase{\moduletitle}\par}
+  \end{minipage}%
+  \begin{minipage}[c]{0.18\textwidth}\mbox{}\end{minipage}
+
+  \vspace{0.22in}
+  \noindent\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lr}
+    Time Allowed: \timeallowed & \paperdate
+  \end{tabular*}
+  \vspace{0.02in}
+  \noindent\rule{\textwidth}{0.55pt}
+
+  \vspace{0.24in}
+  {\bfseries INSTRUCTIONS TO CANDIDATES\par}
+  \vspace{0.12in}
+  \begin{enumerate}[label=\arabic*.,leftmargin=2.0em,labelsep=0.8em,itemsep=0.13in,topsep=0pt]
+    \item This paper consists of two sections as Section 01 and Section 02.
+    \item This paper contains \questioncount{} questions on \pageref{LastPage} pages including this cover page.
+    \item Answer each section in a \textbf{separate booklet}. Clearly write the section number on the cover page of those booklets.
+    \item The total marks obtainable for this examination is \totalmarks. The marks assigned for each question are included in square brackets.
+    \item This examination accounts for \assessmentweight{} of the module assessment.
+    \item Non-programmable calculators are allowed.
+    \item This is a closed-book examination.
+    \item Answer \textbf{ALL} questions.
+  \end{enumerate}
+  \vfill
+  \endgroup
+  \newpage
+  \thispagestyle{fancy}
+}
+
+\newcommand{\sectiontitle}[2]{%
+  \begin{center}
+    \textbf{#1}\\[-0.1em]
+    \textit{[Total Marks: #2 Marks]}
+  \end{center}
+  \vspace{0.08in}
+}
+
+\newcommand{\question}[2]{%
+  \vspace{0.10in}\noindent\textbf{Question \ifnum#1<10 0\fi#1 [#2 Marks]}\par\vspace{0.06in}
+}
+
+\renewcommand{\marks}[1]{\unskip\par\nobreak\hfill\mbox{[#1 Marks]}\par}
+\newcommand{\multimarks}[2]{\unskip\par\nobreak\hfill\mbox{[#1 $\times$ #2 Marks]}\par}
+\newcommand{\scenario}[1]{#1\par\vspace{0.06in}}
+
+\newenvironment{subquestions}{%
+  \begin{enumerate}[label=(\alph*),leftmargin=2.1em,labelsep=0.65em,itemsep=0.06in,topsep=0.03in,parsep=0pt]
+}{\end{enumerate}}
+
+\newenvironment{subquestionsresume}{%
+  \begin{enumerate}[label=(\alph*),leftmargin=2.1em,labelsep=0.65em,itemsep=0.06in,topsep=0.03in,parsep=0pt,start=2]
+}{\end{enumerate}}
+
+\newcommand{\paperend}{%
+  \vspace{0.16in}\begin{center}\textbf{End of Paper.}\end{center}
+}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+\coverpage
+\input{\contentfile}
+\clearpage
+\end{document}

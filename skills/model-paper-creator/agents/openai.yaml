@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Paper Creator"
+  short_description: "Create authentic syllabus-aligned model exam papers"
+  default_prompt: "Use $model-paper-creator to create model examination papers from my syllabus and past-paper references."
