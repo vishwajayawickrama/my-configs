@@ -1,0 +1,79 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,top=21mm,bottom=19mm,left=23.5mm,right=23.5mm,footskip=9mm]{geometry}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage[hidelinks,bookmarksopen=true,bookmarksopenlevel=1,bookmarksnumbered=true]{hyperref}
+
+% Replace the fallback if the user requires an exact installed font.
+\IfFontExistsTF{Times New Roman}{
+  \setmainfont{Times New Roman}
+  \setsansfont{Times New Roman}
+}{
+  \setmainfont{TeX Gyre Termes}
+  \setsansfont{TeX Gyre Termes}
+}
+
+\setlength{\parindent}{1.45em}
+\setlength{\parskip}{0pt}
+\setlist{topsep=2.5pt,itemsep=0.6pt,parsep=0pt,partopsep=0pt}
+\setlist[itemize,1]{leftmargin=2.8em,labelsep=0.75em}
+\setlist[enumerate,1]{leftmargin=3.0em,labelsep=0.65em}
+\setlist[itemize,2]{leftmargin=2.35em,labelsep=0.65em}
+\setlist[enumerate,2]{leftmargin=2.5em,labelsep=0.6em}
+\renewcommand{\arraystretch}{1.14}
+\setlength{\tabcolsep}{4pt}
+\emergencystretch=2em
+
+\titleformat{\subsection}{\rmfamily\bfseries\Large}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\rmfamily\bfseries\large}{\thesubsubsection}{0.65em}{}
+\titlespacing*{\subsection}{0pt}{16pt}{7pt}
+\titlespacing*{\subsubsection}{0pt}{11pt}{5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\newcommand{\keydef}[2]{\par\medskip\noindent\textbf{#1.} #2\par\smallskip}
+\newcommand{\term}[1]{\textbf{#1}}
+\newcounter{lessoncount}
+\newcommand{\lesson}[2]{%
+  \ifnum\value{lessoncount}>0\clearpage\fi
+  \stepcounter{lessoncount}%
+  \stepcounter{section}%
+  \pdfbookmark[1]{Lesson #1: #2}{lesson.#1}%
+  \vspace*{1mm}%
+  {\Large Lesson #1\par}%
+  \vspace{5pt}%
+  {\raggedright\fontsize{23}{28}\selectfont\bfseries #2\par}%
+  \vspace{13pt}%
+}
+
+\begin{document}
+
+\lesson{01}{Lesson title}
+
+\subsection{First topic}
+\keydef{Key term}{A concise, academically worded definition.}
+
+Use paragraphs for connected explanation. Introduce lists with a flush-left sentence.
+
+\noindent The framework contains three components:
+\begin{itemize}
+  \item the first parallel component;
+  \item the second parallel component; and
+  \item the third parallel component.
+\end{itemize}
+
+\subsubsection{A subordinate topic}
+Continue the note here.
+
+\end{document}

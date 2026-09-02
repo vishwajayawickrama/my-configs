@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lecture Decks to Academic Notes"
+  short_description: "Turn lecture decks into verified LaTeX notes"
+  default_prompt: "Use $lecture-decks-to-academic-notes to turn my lecture decks into concise, complete academic LaTeX notes and a verified PDF."

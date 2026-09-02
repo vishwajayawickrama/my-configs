@@ -72,5 +72,6 @@ That's it — the symlinks already point at the updated files.
 | Skill | What it does |
 |-------|--------------|
 | `beej-guide` | Writes a full-length technical guide/book on any topic in the style of Beej's Guides (beej.us) — friendly voice, chapter projects, exercises, verified examples — producing PDF + split-per-chapter HTML. |
+| `lecture-decks-to-academic-notes` | Converts lecture decks into concise, coverage-audited academic LaTeX notes and a compiled PDF, with OCR support, semantic list formatting, configurable page limits, navigation bookmarks, and visual verification. |
 | `model-paper-creator` | Creates challenging, syllabus-complete model examination papers that reproduce supplied past-paper structure in clean LaTeX while keeping every question original across the set. |
 | `video-to-slide-deck` | Extracts high-resolution, OCR-searchable PDF slide decks from lecture and presentation video recordings (MP4, MKV, MOV) with canvas auto-cropping, UI overlay removal, slide deduplication, and hierarchical Table of Contents bookmarks. |
