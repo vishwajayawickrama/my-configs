@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research AI-Usage Audit"
+  short_description: "Audit research papers for evidence of AI-assisted writing"
+  default_prompt: "Audit the supplied research paper for signs of AI-assisted writing and produce a rigorous, evidence-backed report without modifying the source."
