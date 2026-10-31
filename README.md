@@ -1,9 +1,9 @@
 # my-configs
 
 Personal configuration and tooling, version-controlled. **This repo is
-the source of truth** — everything is installed by symlinking it into
-the place each tool expects, so a `git pull` here updates every machine
-at once with no re-copying.
+the source of truth** — most configurations are installed by symlinking
+them into the place each tool expects. Application-specific imports, such
+as HandBrake presets, are documented in their own directories.
 
 ## Get the repo
 
@@ -34,6 +34,7 @@ destination paths, plus any reload/restart step:
 | [`skills/`](skills/README.md) | Reusable agent skills (Claude Code, Codex, or anything that reads a skills directory). |
 | [`plugins/`](plugins/README.md) | Installable Codex plugins with bundled skills and MCP servers. |
 | [`ghostty/`](ghostty/README.md) | [Ghostty](https://ghostty.org) terminal configuration. |
+| [`handbrake/`](handbrake/README.md) | Lecture encoding presets for HandBrake, imported through the app. |
 
 ## Updating
 
@@ -41,4 +42,5 @@ destination paths, plus any reload/restart step:
 cd ~/Codes/my-configs && git pull
 ```
 
-The symlinks already point at the updated files.
+Symlinks already point at the updated files. For configurations installed
+through an app import, follow the update steps in that directory’s README.
